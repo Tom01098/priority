@@ -3,7 +3,7 @@ mod schema;
 
 use crate::db::NewTodo;
 use clap::Parser;
-use diesel::{Connection, RunQueryDsl, SqliteConnection};
+use diesel::{Connection, QueryDsl, RunQueryDsl, SelectableHelper, SqliteConnection};
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use dotenvy::dotenv;
 
@@ -17,6 +17,7 @@ struct Cli {
 #[derive(Debug, Parser)]
 enum Command {
     Add(Add),
+    List,
 }
 
 #[derive(Debug, Parser)]
@@ -35,6 +36,7 @@ fn main() {
 
     match args.command {
         Command::Add(add) => handle_add(&mut connection, &add),
+        Command::List => handle_list(&mut connection),
     }
 }
 
@@ -54,4 +56,21 @@ fn handle_add(connection: &mut SqliteConnection, add: &Add) {
         .values(&new_todo)
         .execute(connection)
         .unwrap();
+}
+
+fn handle_list(connection: &mut SqliteConnection) {
+    let todos = schema::todo::dsl::todo
+        .select(db::Todo::as_select())
+        .load(connection)
+        .unwrap();
+
+    let mut builder = tabled::builder::Builder::default();
+    builder.insert_record(0, ["ID", "Title"]);
+
+    for (i, todo) in todos.iter().enumerate() {
+        builder.insert_record(i + 1, [&todo.id.to_string(), &todo.title]);
+    }
+
+    let table = builder.build();
+    println!("{table}");
 }
