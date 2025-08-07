@@ -6,12 +6,25 @@ use diesel::query_builder::{QueryFragment, QueryId};
 use diesel::sqlite::Sqlite;
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 
-pub fn connect(url: &str) -> SqliteConnection {
-    let mut connection =
-        SqliteConnection::establish(url).unwrap_or_else(|_| panic!("Error opening {url}"));
+use crate::error::{DatabaseError, Error, Result};
+
+pub fn connect(url: &str) -> Result<SqliteConnection> {
+    let mut connection = SqliteConnection::establish(url).map_err(|source| {
+        Error::Database(DatabaseError::Connection {
+            url: url.to_string(),
+            source,
+        })
+    })?;
     const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
-    connection.run_pending_migrations(MIGRATIONS).unwrap();
     connection
+        .run_pending_migrations(MIGRATIONS)
+        .map_err(|source| {
+            Error::Database(DatabaseError::Migration {
+                url: url.to_string(),
+                source,
+            })
+        })?;
+    Ok(connection)
 }
 
 #[derive(Debug, PartialEq, Queryable, Selectable)]

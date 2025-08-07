@@ -1,4 +1,5 @@
 use crate::db;
+use crate::error::Result;
 use clap::Parser;
 use db::Todo;
 use diesel::{RunQueryDsl, SqliteConnection};
@@ -11,7 +12,7 @@ pub struct Cli {
 }
 
 impl Cli {
-    pub fn handle(&self, connection: &mut SqliteConnection) {
+    pub fn handle(&self, connection: &mut SqliteConnection) -> Result<()> {
         match &self.command {
             Command::Add(add) => add.handle(connection),
             Command::List => handle_list(connection),
@@ -31,14 +32,15 @@ pub struct Add {
 }
 
 impl Add {
-    fn handle(&self, connection: &mut SqliteConnection) {
+    fn handle(&self, connection: &mut SqliteConnection) -> Result<()> {
         let create_query = Todo::create(&self.title);
-        create_query.execute(connection).unwrap();
+        create_query.execute(connection)?;
+        Ok(())
     }
 }
 
-fn handle_list(connection: &mut SqliteConnection) {
-    let todos = Todo::list().load(connection).unwrap();
+fn handle_list(connection: &mut SqliteConnection) -> Result<()> {
+    let todos = Todo::list().load(connection)?;
 
     let mut builder = tabled::builder::Builder::default();
     builder.push_record(["ID", "Title"]);
@@ -49,4 +51,5 @@ fn handle_list(connection: &mut SqliteConnection) {
 
     let table = builder.build();
     println!("{table}");
+    Ok(())
 }
