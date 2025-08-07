@@ -1,7 +1,6 @@
-use crate::db::NewTodo;
-use crate::{db, schema};
+use crate::db::{self, NewTodo};
 use clap::Parser;
-use diesel::{QueryDsl, RunQueryDsl, SelectableHelper, SqliteConnection};
+use diesel::{RunQueryDsl, SqliteConnection};
 
 #[derive(Debug, Parser)]
 #[command(version, about)]
@@ -33,16 +32,14 @@ pub struct Add {
 impl Add {
     fn handle(&self, connection: &mut SqliteConnection) {
         let new_todo = NewTodo::new(&self.title);
-        diesel::insert_into(schema::todo::table)
-            .values(&new_todo)
+        db::create_todo(&new_todo)
             .execute(connection)
             .unwrap();
     }
 }
 
 fn handle_list(connection: &mut SqliteConnection) {
-    let todos = schema::todo::dsl::todo
-        .select(db::Todo::as_select())
+    let todos = db::list_todos()
         .load(connection)
         .unwrap();
 

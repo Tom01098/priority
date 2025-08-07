@@ -1,6 +1,5 @@
 mod cli;
 mod db;
-mod schema;
 
 use crate::db::connect;
 use clap::Parser;
