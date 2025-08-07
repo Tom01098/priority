@@ -2,6 +2,7 @@ mod schema;
 
 use diesel::dsl::{AsSelect, Select};
 use diesel::prelude::*;
+use diesel::query_builder::{QueryFragment, QueryId};
 use diesel::sqlite::Sqlite;
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 
@@ -32,27 +33,26 @@ impl Todo {
         use schema::todo::dsl::*;
         todo.select(Todo::as_select())
     }
+
+    pub fn create<'a>(
+        title: &'a str,
+    ) -> impl RunQueryDsl<SqliteConnection> + QueryId + QueryFragment<Sqlite> + 'a {
+        let new_todo = NewTodo::new(title);
+        diesel::insert_into(schema::todo::table)
+            .values(new_todo)
+            .returning(Todo::as_select())
+    }
 }
 
 #[derive(Debug, PartialEq, Insertable)]
 #[diesel(table_name = schema::todo)]
 #[diesel(check_for_backend(Sqlite))]
-pub struct NewTodo<'a> {
+struct NewTodo<'a> {
     title: &'a str,
 }
 
 impl<'a> NewTodo<'a> {
-    pub fn new(title: &'a str) -> Self {
+    fn new(title: &'a str) -> Self {
         Self { title }
     }
-}
-
-pub fn create_todo<'a>(
-    new_todo: &'a NewTodo<'a>,
-) -> impl RunQueryDsl<SqliteConnection>
-+ diesel::query_builder::QueryId
-+ diesel::query_builder::QueryFragment<Sqlite>
-+ 'a {
-    use schema::todo::dsl::*;
-    diesel::insert_into(todo).values(new_todo)
 }

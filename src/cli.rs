@@ -1,4 +1,4 @@
-use crate::db::{self, NewTodo};
+use crate::db;
 use clap::Parser;
 use db::Todo;
 use diesel::{RunQueryDsl, SqliteConnection};
@@ -32,8 +32,8 @@ pub struct Add {
 
 impl Add {
     fn handle(&self, connection: &mut SqliteConnection) {
-        let new_todo = NewTodo::new(&self.title);
-        db::create_todo(&new_todo).execute(connection).unwrap();
+        let create_query = Todo::create(&self.title);
+        create_query.execute(connection).unwrap();
     }
 }
 
