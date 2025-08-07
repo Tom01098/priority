@@ -1,5 +1,6 @@
 use crate::db::{self, NewTodo};
 use clap::Parser;
+use db::Todo;
 use diesel::{RunQueryDsl, SqliteConnection};
 
 #[derive(Debug, Parser)]
@@ -32,16 +33,12 @@ pub struct Add {
 impl Add {
     fn handle(&self, connection: &mut SqliteConnection) {
         let new_todo = NewTodo::new(&self.title);
-        db::create_todo(&new_todo)
-            .execute(connection)
-            .unwrap();
+        db::create_todo(&new_todo).execute(connection).unwrap();
     }
 }
 
 fn handle_list(connection: &mut SqliteConnection) {
-    let todos = db::list_todos()
-        .load(connection)
-        .unwrap();
+    let todos = Todo::list().load(connection).unwrap();
 
     let mut builder = tabled::builder::Builder::default();
     builder.push_record(["ID", "Title"]);
