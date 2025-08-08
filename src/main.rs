@@ -4,7 +4,7 @@ mod error;
 
 use crate::cli::Cli;
 use crate::db::connect;
-use crate::error::{EnvironmentError, Error, Result};
+use crate::error::Result;
 use clap::Parser;
 use dotenvy::dotenv;
 use std::process::ExitCode;
@@ -24,15 +24,7 @@ fn run() -> Result<()> {
 
     dotenv().ok();
 
-    let url = match std::env::var("DATABASE_URL") {
-        Ok(url) => url,
-        Err(_) => {
-            let home_dir =
-                std::env::home_dir().ok_or(Error::Environment(EnvironmentError::HomeDir))?;
-            format!("sqlite://{}/.priority", home_dir.display())
-        }
-    };
-
+    let url = args.database_url()?;
     let mut connection = connect(&url)?;
 
     args.handle(&mut connection)?;

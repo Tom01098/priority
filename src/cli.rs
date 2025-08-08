@@ -1,5 +1,5 @@
 use crate::db;
-use crate::error::Result;
+use crate::error::{EnvironmentError, Error, Result};
 use clap::Parser;
 use db::Todo;
 use diesel::{RunQueryDsl, SqliteConnection};
@@ -9,6 +9,9 @@ use diesel::{RunQueryDsl, SqliteConnection};
 pub struct Cli {
     #[clap(subcommand)]
     command: Command,
+
+    #[clap(long)]
+    database_url: Option<String>,
 }
 
 impl Cli {
@@ -17,6 +20,19 @@ impl Cli {
             Command::Add(add) => add.handle(connection),
             Command::List => handle_list(connection),
         }
+    }
+
+    pub fn database_url(&self) -> Result<String> {
+        if let Some(url) = &self.database_url {
+            return Ok(url.to_string());
+        }
+
+        if let Ok(url) = std::env::var("DATABASE_URL") {
+            return Ok(url);
+        }
+
+        let home_dir = std::env::home_dir().ok_or(Error::Environment(EnvironmentError::HomeDir))?;
+        Ok(format!("sqlite://{}/.priority", home_dir.display()))
     }
 }
 
