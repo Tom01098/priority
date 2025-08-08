@@ -7,6 +7,7 @@ use diesel::sqlite::Sqlite;
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 
 use crate::error::{DatabaseError, Error, Result};
+use crate::table::AsTableRow;
 
 pub fn connect(url: &str) -> Result<SqliteConnection> {
     let mut connection = SqliteConnection::establish(url).map_err(|source| {
@@ -36,10 +37,6 @@ pub struct Todo {
 }
 
 impl Todo {
-    pub fn as_row(&self) -> Vec<String> {
-        vec![self.id.to_string(), self.title.clone()]
-    }
-
     pub fn list() -> impl LoadQuery<'static, SqliteConnection, Todo> {
         use schema::todo::dsl::*;
         todo.select(Todo::as_select())
@@ -52,6 +49,14 @@ impl Todo {
         diesel::insert_into(schema::todo::table)
             .values(new_todo)
             .returning(Todo::as_select())
+    }
+}
+
+impl AsTableRow for Todo {
+    const HEADERS: &'static [&'static str] = &["ID", "Title"];
+
+    fn as_row(&self) -> Vec<String> {
+        vec![self.id.to_string(), self.title.clone()]
     }
 }
 

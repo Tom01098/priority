@@ -1,6 +1,7 @@
 mod cli;
 mod db;
 mod error;
+mod table;
 
 use crate::cli::Cli;
 use crate::db::connect;

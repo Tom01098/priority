@@ -1,5 +1,6 @@
 use crate::db;
 use crate::error::{EnvironmentError, Error, Result};
+use crate::table::AsTable;
 use clap::Parser;
 use db::Todo;
 use diesel::{RunQueryDsl, SqliteConnection};
@@ -57,15 +58,7 @@ impl Add {
 
 fn handle_list(connection: &mut SqliteConnection) -> Result<()> {
     let todos = Todo::list().load(connection)?;
-
-    let mut builder = tabled::builder::Builder::default();
-    builder.push_record(["ID", "Title"]);
-
-    for todo in todos.iter() {
-        builder.push_record(todo.as_row());
-    }
-
-    let table = builder.build();
+    let table = todos.as_table();
     println!("{table}");
     Ok(())
 }
