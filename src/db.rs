@@ -1,8 +1,8 @@
 mod schema;
 
-use diesel::dsl::{AsSelect, Select};
 use diesel::prelude::*;
 use diesel::query_builder::{QueryFragment, QueryId};
+use diesel::query_dsl::LoadQuery;
 use diesel::sqlite::Sqlite;
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 
@@ -35,14 +35,12 @@ pub struct Todo {
     title: String,
 }
 
-pub type AllTodos = Select<schema::todo::table, AsSelect<Todo, Sqlite>>;
-
 impl Todo {
     pub fn as_row(&self) -> Vec<String> {
         vec![self.id.to_string(), self.title.clone()]
     }
 
-    pub fn list() -> AllTodos {
+    pub fn list() -> impl LoadQuery<'static, SqliteConnection, Todo> {
         use schema::todo::dsl::*;
         todo.select(Todo::as_select())
     }
