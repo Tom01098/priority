@@ -14,7 +14,7 @@ pub enum Error {
 }
 
 impl Error {
-    pub fn exit_code(&self) -> i32 {
+    pub fn exit_code(&self) -> u8 {
         match self {
             Error::Database(err) => err.exit_code(),
             Error::Environment(err) => err.exit_code(),
@@ -39,7 +39,7 @@ pub enum DatabaseError {
 }
 
 impl DatabaseError {
-    pub fn exit_code(&self) -> i32 {
+    pub fn exit_code(&self) -> u8 {
         match self {
             DatabaseError::Connection { .. } => 2,
             DatabaseError::Migration { .. } => 2,
@@ -55,7 +55,7 @@ pub enum EnvironmentError {
 }
 
 impl EnvironmentError {
-    pub fn exit_code(&self) -> i32 {
+    pub fn exit_code(&self) -> u8 {
         2
     }
 }

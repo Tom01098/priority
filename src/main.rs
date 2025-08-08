@@ -15,7 +15,7 @@ fn main() -> ExitCode {
         Ok(_) => ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("Error: {e}");
-            ExitCode::from(e.exit_code() as u8)
+            ExitCode::from(e.exit_code())
         }
     }
 }
