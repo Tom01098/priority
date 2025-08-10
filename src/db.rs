@@ -1,13 +1,13 @@
 mod schema;
 
+use crate::error::{DatabaseError, Error, Result};
+use crate::table::AsTableRow;
 use diesel::prelude::*;
 use diesel::query_builder::{QueryFragment, QueryId};
 use diesel::query_dsl::LoadQuery;
 use diesel::sqlite::Sqlite;
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
-
-use crate::error::{DatabaseError, Error, Result};
-use crate::table::AsTableRow;
+use time::PrimitiveDateTime;
 
 pub fn connect(url: &str) -> Result<SqliteConnection> {
     let mut connection = SqliteConnection::establish(url).map_err(|source| {
@@ -34,6 +34,7 @@ pub fn connect(url: &str) -> Result<SqliteConnection> {
 pub struct Todo {
     id: i32,
     title: String,
+    created_at: PrimitiveDateTime,
 }
 
 impl Todo {

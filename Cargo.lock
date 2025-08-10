@@ -489,6 +489,7 @@ dependencies = [
  "tabled",
  "tempfile",
  "thiserror",
+ "time",
 ]
 
 [[package]]
