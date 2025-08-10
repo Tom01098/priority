@@ -19,7 +19,7 @@ impl Cli {
     pub fn handle(&self, connection: &mut SqliteConnection) -> Result<()> {
         match &self.command {
             Command::Add(add) => add.handle(connection),
-            Command::List => handle_list(connection),
+            Command::List(list) => list.handle(connection),
         }
     }
 
@@ -40,7 +40,7 @@ impl Cli {
 #[derive(Debug, Parser)]
 pub enum Command {
     Add(Add),
-    List,
+    List(List),
 }
 
 #[derive(Debug, Parser)]
@@ -56,9 +56,14 @@ impl Add {
     }
 }
 
-fn handle_list(connection: &mut SqliteConnection) -> Result<()> {
-    let todos = Todo::all().load(connection)?;
-    let table = todos.as_table();
-    println!("{table}");
-    Ok(())
+#[derive(Debug, Parser)]
+pub struct List;
+
+impl List {
+    fn handle(&self, connection: &mut SqliteConnection) -> Result<()> {
+        let todos = Todo::all().load(connection)?;
+        let table = todos.as_table();
+        println!("{table}");
+        Ok(())
+    }
 }
