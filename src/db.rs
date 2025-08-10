@@ -43,9 +43,9 @@ impl Todo {
         todo.select(Todo::as_select())
     }
 
-    pub fn create<'a>(
-        title: &'a str,
-    ) -> impl RunQueryDsl<SqliteConnection> + QueryId + QueryFragment<Sqlite> + 'a {
+    pub fn create(
+        title: &str,
+    ) -> impl RunQueryDsl<SqliteConnection> + QueryId + QueryFragment<Sqlite> {
         let new_todo = NewTodo::new(title);
         diesel::insert_into(schema::todo::table)
             .values(new_todo)
