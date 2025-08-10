@@ -32,7 +32,7 @@ impl Cli {
             return Ok(url);
         }
 
-        let home_dir = std::env::home_dir().ok_or(Error::Environment(EnvironmentError::HomeDir))?;
+        let home_dir = dirs::home_dir().ok_or(Error::Environment(EnvironmentError::HomeDir))?;
         Ok(format!("sqlite://{}/.priority", home_dir.display()))
     }
 }
