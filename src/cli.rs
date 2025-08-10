@@ -57,7 +57,7 @@ impl Add {
 }
 
 fn handle_list(connection: &mut SqliteConnection) -> Result<()> {
-    let todos = Todo::list().load(connection)?;
+    let todos = Todo::all().load(connection)?;
     let table = todos.as_table();
     println!("{table}");
     Ok(())

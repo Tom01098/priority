@@ -38,7 +38,7 @@ pub struct Todo {
 }
 
 impl Todo {
-    pub fn list() -> impl LoadQuery<'static, SqliteConnection, Todo> {
+    pub fn all() -> impl LoadQuery<'static, SqliteConnection, Todo> {
         use schema::todo::dsl::*;
         todo.select(Todo::as_select())
     }
@@ -46,7 +46,7 @@ impl Todo {
     pub fn create(
         title: &str,
     ) -> impl RunQueryDsl<SqliteConnection> + QueryId + QueryFragment<Sqlite> {
-        let new_todo = NewTodo::new(title);
+        let new_todo = NewTodo { title };
         diesel::insert_into(schema::todo::table)
             .values(new_todo)
             .returning(Todo::as_select())
@@ -66,10 +66,4 @@ impl AsTableRow for Todo {
 #[diesel(check_for_backend(Sqlite))]
 struct NewTodo<'a> {
     title: &'a str,
-}
-
-impl<'a> NewTodo<'a> {
-    fn new(title: &'a str) -> Self {
-        Self { title }
-    }
 }
